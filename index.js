@@ -1,7 +1,7 @@
 const express = require('express')
 const dotenv = require('dotenv')
 const cors = require('cors')
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 dotenv.config()
 
 
@@ -23,23 +23,34 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-   
+
     await client.connect();
     const db = client.db("wanderlust")
     const destinationCollection = db.collection("destinations")
 
 
-    app.get('/destination', async(req,res)=>{
-        const result = await destinationCollection.find().toArray()
-        res.json(result)
+    app.get('/destination', async (req, res) => {
+      const result = await destinationCollection.find().toArray()
+      res.json(result)
     })
 
-    app.post('/destination', async(req,res)=>{
-        const destinationData = req.body;
-        console.log(destinationData)
-        const result = await destinationCollection.insertOne(destinationData)
-        res.send(result);
+    app.post('/destination', async (req, res) => {
+      const destinationData = req.body;
+      console.log(destinationData)
+      const result = await destinationCollection.insertOne(destinationData)
+      res.send(result);
     })
+
+    app.get('/destination/:id', async (req, res) => {
+      const id = req.params.id;
+
+      const result = await destinationCollection.findOne({
+        _id: new ObjectId(id)
+      });
+
+      res.send(result);
+    });
+
 
 
     await client.db("admin").command({ ping: 1 });
