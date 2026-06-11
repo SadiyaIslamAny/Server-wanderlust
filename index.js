@@ -27,6 +27,7 @@ async function run() {
     await client.connect();
     const db = client.db("wanderlust")
     const destinationCollection = db.collection("destinations")
+    const bookingCollection = db.collection("bookings")
 
 
     app.get('/destination', async (req, res) => {
@@ -51,6 +52,13 @@ async function run() {
       res.send(result);
     });
 
+
+    app.post('/booking', async(req,res)=>{
+      const bookingData = req.body;
+      console.log(bookingData);
+      const result = await bookingCollection.insertOne(bookingData)
+      res.send(result);
+    })
 
 
     app.patch('/destination/:id', async (req, res) => {
