@@ -42,6 +42,7 @@ async function run() {
       res.send(result);
     })
 
+
     app.get('/destination/:id', async (req, res) => {
       const id = req.params.id;
 
@@ -53,13 +54,39 @@ async function run() {
     });
 
 
-    app.post('/booking', async(req,res)=>{
-      const bookingData = req.body;
-      console.log(bookingData);
-      const result = await bookingCollection.insertOne(bookingData)
-      res.send(result);
-    })
+    app.get('/booking/:userId', async (req, res) => {
+      const { userId } = req.params;
 
+      const result = await bookingCollection.find({
+        userId: userId
+      }).toArray();
+
+      res.send(result);
+    });
+
+
+    app.post('/booking', async (req, res) => {
+      const bookingData = req.body;
+
+      const formattedData = {
+        ...bookingData,
+        departureDate: new Date(
+          bookingData.departureDate.year,
+          bookingData.departureDate.month - 1,
+          bookingData.departureDate.day
+        ).toISOString(),
+      };
+
+      const result = await bookingCollection.insertOne(formattedData);
+      res.send(result);
+    });
+
+
+    app.delete('/booking/:bookingId', async(req, res)=>{
+      const {bookingId} = req.params;
+      const result = await bookingCollection.deleteOne({_id: new ObjectId(bookingId)});
+      res.send(result)
+    })
 
     app.patch('/destination/:id', async (req, res) => {
       const id = req.params.id;
@@ -72,7 +99,7 @@ async function run() {
       res.send(result);
     })
 
-    app.delete('/destination/:id', async (req, res) =>{
+    app.delete('/destination/:id', async (req, res) => {
       const id = req.params.id;
       const result = await destinationCollection.deleteOne({ _id: new ObjectId(id) },)
       res.send(result)
